@@ -1,0 +1,5 @@
+path,species,embedding_path
+D:/111icde_addition_experiments/4_species_immune/processed_h5ad/human.h5ad,human,D:/protein_go_ontology_embeddings/human_protein_go_fused.fused_embedding.pkl.gz
+D:/111icde_addition_experiments/4_species_immune/processed_h5ad/mouse.h5ad,mouse,D:/protein_go_ontology_embeddings/mouse_protein_go_fused.fused_embedding.pkl.gz
+D:/111icde_addition_experiments/4_species_immune/processed_h5ad/pig.h5ad,pig,D:/protein_go_ontology_embeddings/pig_protein_go_fused.fused_embedding.pkl.gz
+D:/111icde_addition_experiments/4_species_immune/processed_h5ad/macaM.h5ad,macaM,D:/protein_go_ontology_embeddings/macaca_mulatta_protein_go_fused.fused_embedding.pkl.gz

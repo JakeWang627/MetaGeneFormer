@@ -1,4 +1,7 @@
 """Helper functions for loading pretrained gene embeddings."""
+import gzip
+import pickle
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Dict, Tuple
 
@@ -57,6 +60,48 @@ MODEL_TO_SPECIES_TO_GENE_EMBEDDING_PATH = {
     },
 }
 
+
+def load_gene_embedding_file(embedding_path: str | Path) -> Dict[str, torch.Tensor]:
+    """Load a gene-to-embedding mapping from a PyTorch or gzipped pickle file."""
+    embedding_path = Path(embedding_path)
+    path_name = embedding_path.name.lower()
+
+    if path_name.endswith(".pkl.gz") or path_name.endswith(".pickle.gz"):
+        with gzip.open(embedding_path, "rb") as handle:
+            loaded = pickle.load(handle)
+    elif embedding_path.suffix.lower() in {".pt", ".pth"}:
+        loaded = torch.load(embedding_path, map_location="cpu")
+    else:
+        raise ValueError(
+            f"Unsupported embedding file format: {embedding_path}. "
+            "Expected .pt, .pth, .pkl.gz, or .pickle.gz."
+        )
+
+    if not isinstance(loaded, Mapping):
+        raise TypeError(
+            f"Embedding file {embedding_path} must contain a mapping from gene "
+            f"symbols to vectors, got {type(loaded).__name__}."
+        )
+
+    embeddings: Dict[str, torch.Tensor] = {}
+    for gene_symbol, embedding in loaded.items():
+        try:
+            tensor = torch.as_tensor(embedding, dtype=torch.float32)
+        except (TypeError, ValueError) as error:
+            raise TypeError(
+                f"Embedding for gene {gene_symbol!r} in {embedding_path} "
+                f"cannot be converted to a tensor."
+            ) from error
+        if tensor.ndim != 1:
+            raise ValueError(
+                f"Embedding for gene {gene_symbol!r} in {embedding_path} must "
+                f"be one-dimensional, got shape {tuple(tensor.shape)}."
+            )
+        embeddings[str(gene_symbol)] = tensor
+
+    return embeddings
+
+
 def load_gene_embeddings_adata(adata: AnnData, species: list, embedding_model: str, embedding_path: str = None) -> Tuple[AnnData, Dict[str, torch.FloatTensor]]:
     """Loads gene embeddings for all the species/genes in the provided data.
 
@@ -86,7 +131,9 @@ def load_gene_embeddings_adata(adata: AnnData, species: list, embedding_model: s
         species_to_gene_symbol_to_embedding = {
                 species: {
                     gene_symbol.lower(): gene_embedding
-                    for gene_symbol, gene_embedding in torch.load(species_to_gene_embedding_path[species]).items()
+                    for gene_symbol, gene_embedding in load_gene_embedding_file(
+                        species_to_gene_embedding_path[species]
+                    ).items()
                 }
                 for species in species_names
             }
@@ -95,7 +142,9 @@ def load_gene_embeddings_adata(adata: AnnData, species: list, embedding_model: s
         species_to_gene_symbol_to_embedding = {
             species: {
                 gene_symbol.lower(): gene_embedding
-                for gene_symbol, gene_embedding in torch.load(embedding_path).items()
+                for gene_symbol, gene_embedding in load_gene_embedding_file(
+                    embedding_path
+                ).items()
             }
             for species in species_names
         }

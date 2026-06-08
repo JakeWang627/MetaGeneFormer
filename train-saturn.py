@@ -12,8 +12,17 @@ os.environ["MKL_NUM_THREADS"] = "6" # export MKL_NUM_THREADS=6
 os.environ["VECLIB_MAXIMUM_THREADS"] = "4" # export VECLIB_MAXIMUM_THREADS=4
 os.environ["NUMEXPR_NUM_THREADS"] = "6"
 
+import sys
+from pathlib import Path
 
 import os
+
+# MetaGeneFormer vendors the metric-learning modules except for reducers.
+# Reuse the matching reducers package from the sibling SATURN checkout.
+SATURN_DIR = Path(__file__).resolve().parent.parent / "saturn"
+if SATURN_DIR.is_dir():
+    sys.path.append(str(SATURN_DIR))
+
 import scanpy as sc
 import pandas as pd
 from anndata import AnnData
@@ -37,8 +46,6 @@ from pretrain_utils import *
 
 import argparse
 from datetime import datetime
-from pathlib import Path
-import sys
 sys.path.append('../')
 
 # SATURN

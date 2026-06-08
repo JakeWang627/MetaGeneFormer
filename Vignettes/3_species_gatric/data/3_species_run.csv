@@ -1,0 +1,4 @@
+path,species,embedding_path
+D:/111icde_addition_experiments/3_species_gastric/processed_h5ad/human.h5ad,human,"('D:/protein_go_ontology_embeddings/human_protein_go_fused.fused_embedding.pkl.gz',)"
+D:/111icde_addition_experiments/3_species_gastric/processed_h5ad/mouse.h5ad,mouse,D:/protein_go_ontology_embeddings/mouse_protein_go_fused.fused_embedding.pkl.gz
+D:/111icde_addition_experiments/3_species_gastric/processed_h5ad/pig.h5ad,pig,D:/protein_go_ontology_embeddings/pig_protein_go_fused.fused_embedding.pkl.gz
